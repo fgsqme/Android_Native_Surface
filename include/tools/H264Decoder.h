@@ -27,7 +27,7 @@ public :
 
     void init();
 
-    void decode(unsigned char *inputbuff, size_t size);
+    void decode(uint8_t *inputbuff, size_t size);
 
     uint8_t *getDecBuffer();
 

@@ -73,7 +73,7 @@ int ScaleYUVImgToRGB(int nSrcW, int nSrcH, uint8_t *src_data, int *linesize, int
     return 0;
 }
 
-void H264Decoder::decode(unsigned char *inputbuf, size_t size) {
+void H264Decoder::decode(uint8_t *inputbuf, size_t size) {
 
     avpkt.size = size;
     if (avpkt.size == 0)

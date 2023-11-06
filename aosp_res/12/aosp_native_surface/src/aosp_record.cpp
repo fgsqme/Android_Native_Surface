@@ -439,20 +439,6 @@ static void writeValueLE(UINT value, uint8_t *buffer) {
     }
 }
 
-uint64_t getCurrentTime() {
-    timeval tv{};
-    gettimeofday(&tv, nullptr);
-    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
-
-
-void fpsDelay(uint64_t time, int fps) {
-    if ((1000 / fps) > time) {
-        int fp = (1000 / fps) - time;
-        // printf("sleep: %d\n",fp);
-        std::this_thread::sleep_for(std::chrono::milliseconds(fp));
-    }
-}
 
 
 status_t runEncoder(bool *runFlag, void callback(uint8_t *, size_t)) {

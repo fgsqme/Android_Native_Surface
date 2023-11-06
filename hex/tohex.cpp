@@ -13,7 +13,7 @@ using namespace std;
  * @return
  */
 int main(int argv, char **argc) {
-    ifstream in_file("Z:\\aosp_12\\out\\target\\product\\generic_arm64\\system\\lib\\libSsage.so",
+    ifstream in_file("D:\\Project\\C++\\Android_Native_Surface\\libs\\armeabi-v7a\\aosp_14\\libSsage.so",
                      ios::in | ios::binary);
     filebuf buf;
     buf.open("D:\\Project\\C++\\Android_Native_Surface\\include\\native_surface\\aosp\\dev.h", ios::out);

@@ -40,12 +40,12 @@ void callback(uint8_t *buff, size_t size) {
     mbyte byte[DataEnc::headerSize() + size];
     memcpy(byte + DataEnc::headerSize(), buff, size);
     // 数据打包
-    auto *dataEnc = new DataEnc(byte, DataEnc::headerSize() + size);
+    DataEnc dataEnc(byte, DataEnc::headerSize() + (int) size);
     // 设置数据包下标
-    dataEnc->setDataIndex((int) size);
+    dataEnc.setDataIndex((int) size);
     //printf("size: %zu getDataLen:%d fps:%d\n", size, dataEnc->getDataLen(), fps);
     // 将buff发送
-    if (!tcpClient->send(dataEnc->getData(), dataEnc->getDataLen())) {
+    if (!tcpClient->send(dataEnc.getData(), dataEnc.getDataLen())) {
         // 发送失败退出录屏
         printf("Failed to send buffer\n");
         flag = false;
@@ -58,19 +58,24 @@ void callback(uint8_t *buff, size_t size) {
  * 代码 recordReceive.cpp 作为接收端
  */
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        return -1;
+    }
     // tcp客户端
-    tcpClient = new TCPClient("192.168.31.108", 6656);
+    tcpClient = new TCPClient(argv[1], 6656);
     if (!tcpClient->connect()) {
         return -1;
     }
-    // 开始录屏
     ExternFunction functionRecord;
     // 录屏文件保存路径
     fp = fopen("/sdcard/test.h264", "w");
     // 初始化录屏，帧率设置无用待解决
-    functionRecord.initRecord("1M", 60.0F, 720, 1280);
+    functionRecord.initRecord("1M", 30.0F, 720, 1280);
+    // 开始录屏
     functionRecord.runRecord(&flag, callback);
     functionRecord.stopRecord();
     fclose(fp);
+    tcpClient->close();
+    delete tcpClient;
     return 0;
 }

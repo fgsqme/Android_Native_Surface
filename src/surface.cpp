@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     if (!initDraw(true)) {
         return -1;
     }
-    Init_touch_config();
+//    Init_touch_config();
     printf("Pid is %d\n", getpid());
     bool flag = true;
     while (flag) {

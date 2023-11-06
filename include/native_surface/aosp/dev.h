@@ -1,1 +1,1 @@
-inline unsigned char native_surface_test[30272] = { };
+inline unsigned char native_surface_test[29344] = { };

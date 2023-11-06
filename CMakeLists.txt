@@ -1,15 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
-
-# 开启编译 ON:开启 OFF:关闭
-# opencv
-set(BUILD_OPENCV OFF)
-# hv
-set(BUILD_HV OFF)
-# lua
-set(BUILD_LUA OFF)
-
 # 设置NDK路径
-set(NDK_PATH C:/MDK/android-ndk-r20b)
+set(NDK_PATH D:/MDK/android-ndk-r20b)
 
 ##################### Android设置 #####################
 set(CMAKE_SYSTEM_NAME ANDROID) # 设置目标编译平台参数 Android
@@ -22,18 +13,7 @@ set(ANDROID_NDK ${NDK_PATH}) # 设置ndk路径
 set(CMAKE_TOOLCHAIN_FILE ${NDK_PATH}/build/cmake/android.toolchain.cmake)
 set(ANDROID_SDK_ROOT ${NDK_PATH})
 
-
 project(NativeSurface)
-
-if (BUILD_OPENCV)
-    add_subdirectory(my_android_opencv)
-endif ()
-if (BUILD_HV)
-    add_subdirectory(my_libhv)
-endif ()
-if (BUILD_LUA)
-    add_subdirectory(my_lua)
-endif ()
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -153,12 +133,12 @@ endif ()
 # 可以整合第三方库 需要打开注释即可
 target_link_libraries(NativeSurface PRIVATE EGL GLESv3 log android GLESv2 m dl
         mediandk
-        avformat
-        avcodec
-        avfilter
-        swresample
-        swscale
-        avutil
+#        avformat
+#        avcodec
+#        avfilter
+#        swresample
+#        swscale
+#        avutil
         #        opencv_calib3d opencv_core opencv_imgproc opencv_highgui opencv_videoio opencv_video
         #        hv_static
         #        liblua_static
