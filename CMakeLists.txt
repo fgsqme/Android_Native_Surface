@@ -5,9 +5,9 @@ set(NDK_PATH D:/MDK/android-ndk-r20b)
 ##################### Android设置 #####################
 set(CMAKE_SYSTEM_NAME ANDROID) # 设置目标编译平台参数 Android
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_SYSTEM_VERSION 21) # 系统版本
-set(ANDROID_PLATFORM 21) # 平台版本
-set(ANDROID_SDK_TOOLS_VERSION 20) # 平台版本
+set(CMAKE_SYSTEM_VERSION 24) # 系统版本
+set(ANDROID_PLATFORM 24) # 平台版本
+set(ANDROID_SDK_TOOLS_VERSION 24) # 平台版本
 set(ANDROID_ABI arm64-v8a) # 设置目标构架 armeabi-v7a arm64-v8a x86 x86_64
 set(ANDROID_NDK ${NDK_PATH}) # 设置ndk路径
 set(CMAKE_TOOLCHAIN_FILE ${NDK_PATH}/build/cmake/android.toolchain.cmake)
@@ -35,25 +35,7 @@ include_directories( # 设置全局头文件目录 使其他源码文件可在�
         include/Android_draw
         include/tools
         ffmpeg/include
-        my_android_opencv/include
-        my_android_opencv/modules/highgui/include
-        my_android_opencv/modules/imgcodecs/include
-        my_android_opencv/modules/imgproc/include
-        my_android_opencv/modules/core/include
-        my_android_opencv/modules/video/include
-        my_android_opencv/modules/videoio/include
-        my_android_opencv/modules/world/include
-        my_android_opencv/modules/dnn/include
-        my_android_opencv/modules/ml/include
-        my_android_opencv/modules/features2d/include
-        my_android_opencv/modules/calib3d/include
-        my_android_opencv/modules/flann/include
-        my_android_opencv/modules/objdetect/include
-        my_android_opencv/modules/photo/include
-        my_android_opencv/modules/stitching/include
-        my_libhv/include/hv
-        my_lua/src
-        include/lua
+        libhv_static/include
         )
 ##################### CMake头文件设置 #####################
 
@@ -87,43 +69,9 @@ add_executable(NativeRecordReceive # 生成可执行文件
         src/recordReceive.cpp
         )
 
+add_library(hv_static STATIC IMPORTED)
+set_target_properties(hv_static PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libhv_static/${ANDROID_ABI}/libhv_static.a)
 
-if (BUILD_OPENCV)
-    add_executable(NativeOpencv # 生成可执行文件
-            ${FILE_SOURCES} # 源文件
-            src/opencv.cpp # 源文件
-            )
-    target_link_libraries(NativeOpencv PRIVATE EGL GLESv3 log android GLESv2 m dl mediandk opencv_calib3d opencv_calib3d
-            opencv_core opencv_imgproc opencv_highgui opencv_video opencv_videoio
-            opencv_video
-            mediandk
-            avformat
-            avcodec
-            avfilter
-            swresample
-            swscale
-            avutil
-            )
-
-    #    target_link_libraries(NativeOj PRIVATE EGL GLESv3 log android GLESv2 m dl mediandk opencv_calib3d opencv_calib3d
-    #            opencv_core opencv_imgproc opencv_highgui opencv_video opencv_videoio
-    #            opencv_video hv_static)
-endif ()
-
-if (BUILD_HV)
-    add_executable(NativeHv # 生成可执行文件
-            src/hv.cpp # 源文件
-            )
-    target_link_libraries(NativeHv PRIVATE hv_static)
-
-endif ()
-
-if (BUILD_LUA)
-    add_executable(NativeLua # 生成可执行文件
-            src/lua.cpp # 源文件
-            )
-    target_link_libraries(NativeLua PRIVATE liblua_static)
-endif ()
 
 ##################### 添加产物 #####################
 #target_include_directories(NativeSurface PRIVATE
@@ -133,6 +81,7 @@ endif ()
 # 可以整合第三方库 需要打开注释即可
 target_link_libraries(NativeSurface PRIVATE EGL GLESv3 log android GLESv2 m dl
         mediandk
+        hv_static
 #        avformat
 #        avcodec
 #        avfilter

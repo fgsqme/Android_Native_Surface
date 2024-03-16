@@ -2,6 +2,10 @@
 // Created by Ssage on 2022/3/18.
 //
 #include "main.h"
+// 原始触摸方案
+//#include "touch.h"
+// 触摸穿透解决方案
+#include "touch2.h"
 
 
 /**
@@ -13,7 +17,7 @@ int main(int argc, char *argv[]) {
     if (!initDraw(true)) {
         return -1;
     }
-//    Init_touch_config();
+    initTouch();
     printf("Pid is %d\n", getpid());
     bool flag = true;
     while (flag) {
@@ -64,7 +68,7 @@ int main(int argc, char *argv[]) {
         std::this_thread::sleep_for(1ms);
     }
     shutdown();
-    touchEnd();
+    closeTouch();
     return 0;
 }
 

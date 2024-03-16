@@ -178,12 +178,12 @@ void touch_config() {
     pthread_exit(0);
 }
 
-void Init_touch_config() { // 初始化触摸设置
+void initTouch() { // 初始化触摸设置
     touchFlag = true;
     std::thread touch_thread(touch_config);
     touch_thread.detach();
 }
 
-void touchEnd() {
+void closeTouch() {
     touchFlag = false;
 }

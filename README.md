@@ -6,7 +6,7 @@
 
 ### 功能
 
-- Android c++ 绘制和录屏，目前只测试了安卓12和12.1，其他版本需要自行测试
+- Android c++ 绘制和录屏，目前只测试了安卓12和12.1，触摸穿透只在安卓13设备测试过，其他版本需要自行测试
 
 ### libs
 
@@ -18,10 +18,10 @@
 
 - 录屏
   <br> <br>
-  <img width="300" alt="image" src="gif/record.gif">
+  <img width="300" alt="image" src="gif/record.png">
 - 绘制
   <br> <br>
-  <img width="300" alt="image" src="gif/imgui.gif">
+  <img width="300" alt="image" src="gif/imgui.png">
 
 ---
 
