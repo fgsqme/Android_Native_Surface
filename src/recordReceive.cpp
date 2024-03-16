@@ -8,14 +8,16 @@
 #include "H264Decoder.h"
 #include "ImageTexture.h"
 #include "draw.h"
-#include "touch.h"
-
+// 原始触摸方案
+//#include "touch.h"
+// 触摸穿透解决方案
+#include "touch2.h"
 // 接收h264编码流，使用ffmpeg解码到imgui显示
 int main(int argc, char *argv[]) {
     if (!initDraw(true)) {
         return -1;
     }
-    Init_touch_config();
+    initTouch();
     // h264解码工具
     H264Decoder decoder;
     // Tcp 服务
@@ -60,6 +62,7 @@ int main(int argc, char *argv[]) {
 
     tcpServer.close();
     delete[] buffer;
+    closeTouch();
     shutdown();
     return 0;
 }

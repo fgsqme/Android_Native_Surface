@@ -106,6 +106,7 @@ target_link_libraries(NativeRecordReceive PRIVATE EGL GLESv3 log android GLESv2 
         swresample
         swscale
         avutil
+        hv_static
         #        hv_static
         #        liblua_static
         )
