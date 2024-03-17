@@ -135,6 +135,16 @@ int open_device(const char *dev_name) {
     return -1;
 }
 
+
+/*
+ImVec2 getTouchScreenDimension1(int fd) {
+    int abs_x[6], abs_y[6] = {0};
+    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_X), abs_x);
+    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_Y), abs_y);
+    return {(float) abs_x[2], (float) abs_y[2]};
+}
+*/
+
 int scan_devices() {
     const char *dirname = "/dev/input";
     char devname[4096];
@@ -264,12 +274,6 @@ MDisplayInfo getTouchDisplyInfo1() {
     }
 }
 
-ImVec2 getTouchScreenDimension1(int fd) {
-    int abs_x[6], abs_y[6] = {0};
-    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_X), abs_x);
-    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_Y), abs_y);
-    return {(float) abs_x[2], (float) abs_y[2]};
-}
 
 ImVec2 rotatePointx1(uint32_t orientation, ImVec2 mxy, ImVec2 wh) {
     if (orientation == 0) {
@@ -332,7 +336,6 @@ void on_queue_event(hevent_t *ev) {
         if (events.type == FROM_SCREEN) {
             send_cmd(uinput_fd, EV_ABS, ABS_MT_SLOT, current_screen_slot);
         }
-        ImVec2 touch_screen_size = getTouchScreenDimension1(screen_fd);
 
         int status = IM_MOVE;
         for (input_event e: events.events) {
@@ -379,9 +382,9 @@ void on_queue_event(hevent_t *ev) {
 
         MDisplayInfo mDisplayInfo = getTouchDisplyInfo1();
         ImVec2 point = rotatePointx1(mDisplayInfo.orientation, {(float) eventX, (float) eventY},
-                                     touch_screen_size);
-        ImVec2 newEvent((point.x * (float) mDisplayInfo.width) / touch_screen_size.x,
-                        (point.y * (float) mDisplayInfo.height) / touch_screen_size.y);
+                                     {(float) screen_width, (float) screen_height});
+        ImVec2 newEvent((point.x * (float) mDisplayInfo.width) / (float) screen_width,
+                        (point.y * (float) mDisplayInfo.height) / (float) screen_height);
         ImGuInputEvent imGuInputEvent{};
         imGuInputEvent.fingerIndex = fingerIndex;
         imGuInputEvent.pos = newEvent;
@@ -575,9 +578,10 @@ void *initTouchDevice(void *v) {
     return NULL;
 }
 
-void closeTouch(){
+void closeTouch() {
     hloop_stop(loop);
 }
+
 void initTouch() {
     //触摸监听
     pthread_t t1;

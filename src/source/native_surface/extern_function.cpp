@@ -72,6 +72,8 @@ ExternFunction::ExternFunction() {
             exit(0);
         }
         funcPointer.func_createNativeWindow = dlsym(handle, "_Z18createNativeWindowPKcjjb");
+        funcPointer.func_more_createNativeWindow = dlsym(handle, "_Z18createNativeWindowPKcjjjjb");
+
         // 获取屏幕信息
         funcPointer.func_getDisplayInfo = dlsym(handle, "_Z14getDisplayInfov");
 //        funcPointer.func_setSurfaceWH = dlsym(handle, "_Z12setSurfaceWHjj");
@@ -94,9 +96,13 @@ ExternFunction::ExternFunction() {
 ANativeWindow *
 ExternFunction::createNativeWindow(const char *surface_name, uint32_t screen_width, uint32_t screen_height,
                                    bool author) {
-    return ((ANativeWindow *(*)(
-            const char *, uint32_t, uint32_t, bool))
-            (funcPointer.func_createNativeWindow))(surface_name, screen_width, screen_height, author);
+    if (get_android_api_level() == 34) {
+        return createNativeWindow(surface_name, screen_width, screen_height, 1, 0x2000, author);
+    } else {
+        return ((ANativeWindow *(*)(
+                const char *, uint32_t, uint32_t, bool))
+                (funcPointer.func_createNativeWindow))(surface_name, screen_width, screen_height, author);
+    }
 }
 
 /**
