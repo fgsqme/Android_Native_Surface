@@ -11,6 +11,12 @@
 ### libs
 
 - 项目支持到 Android 9 ~ 14
+### 目录
+- [libsurface](libsurface) c++ 绘制库
+- [examples](examples) 绘制库使用示例
+- [screenRecord](screenRecord) 录屏代理示例
+- [outputs](outputs) 编译后文件输出路径
+- [outputs/include](outputs/include)  c++ 绘制库头文件，供外部调用使用
 
 ---
 
@@ -34,11 +40,10 @@
 
 ---
 
-### 此项目编译输出路径 outputs
+### 执行方法演示
 
-> 执行方法演示 <br>
 >   ```bash
->     chmod +x NativeSurface
->     ./NativeSurface
+>     chmod +x nativeSurface
+>     ./nativeSurface
 >   ```
 
