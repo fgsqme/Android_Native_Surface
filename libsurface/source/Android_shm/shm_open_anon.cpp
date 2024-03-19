@@ -1,6 +1,6 @@
 // Copyright 2019 Lassi Kortela
 // SPDX-License-Identifier: ISC
-#include "Android_shm/shm_open_anon.h"
+#include "shm_open_anon.h"
 #ifdef __linux__
 //#define _GNU_SOURCE
 #include <linux/memfd.h>

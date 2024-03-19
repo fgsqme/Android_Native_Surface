@@ -8,9 +8,14 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 
 // C++
 #include "draw.h"
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_android.h"
 
 #include <linux/input.h>
 #include <linux/uinput.h>

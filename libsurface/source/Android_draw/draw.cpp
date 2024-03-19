@@ -5,6 +5,31 @@
 #include "draw.h"
 //#include <font/Font.h>
 
+// User libs
+//#include <touch.h>
+#include "imgui.h"
+#include "imgui_internal.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_android.h"
+
+#include <EGL/egl.h>
+#include <GLES/gl.h>
+#include <dlfcn.h>
+#include <unistd.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
+#include <android/native_window.h>
+#include <Egl/eglext.h>
+#include <GLES3/gl3platform.h>
+#include <GLES3/gl3ext.h>
+#include <GLES3/gl32.h>
+
+
 // Var
 EGLDisplay display = EGL_NO_DISPLAY;
 EGLConfig config;

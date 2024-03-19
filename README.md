@@ -14,7 +14,7 @@
 ### 目录
 - [libsurface](libsurface) c++ 绘制库
 - [examples](examples) 绘制库使用示例
-- [screenRecord](screenRecord) 录屏代理示例
+- [screenRecord](screenRecord) 录屏代码示例
 - [outputs](outputs) 编译后文件输出路径
 - [outputs/include](outputs/include)  c++ 绘制库头文件，供外部调用使用
 
