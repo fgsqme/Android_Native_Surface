@@ -1,5 +1,6 @@
 
 // 原始触摸，不能解决触摸穿透问题
+/*
 #include "touch.h"
 
 
@@ -26,7 +27,7 @@
 #include <queue>
 #include <random>
 #include <string>
-/*
+
 // User libs
 #include "draw.h"
 

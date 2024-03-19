@@ -14,5 +14,4 @@ include_directories( # 设置全局头文件目录 使其他源码文件可在�
 add_executable(nativeSurface # 生成可执行文件
         surface.cpp
 )
-target_link_libraries(nativeSurface PRIVATE libsurface_static
-)
+target_link_libraries(nativeSurface PRIVATE surface_static)

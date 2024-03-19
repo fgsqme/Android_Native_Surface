@@ -11,12 +11,7 @@
 
 // C++
 #include "draw.h"
-#include "hbase.h"
-#include "hdir.h"
-#include "hlog.h"
-#include "hloop.h"
-#include "hmain.h"
-#include "hv.h"
+
 #include <linux/input.h>
 #include <linux/uinput.h>
 #include <sys/ioctl.h>
@@ -26,6 +21,7 @@
 #include <queue>
 #include <random>
 #include <string>
+#include <dirent.h>
 
 using namespace std;
 
@@ -41,7 +37,7 @@ using namespace std;
 
 struct input_events {
     int type;
-    list<input_event> events;
+    vector<input_event> events;
 };
 
 struct Rectangle {
@@ -51,9 +47,7 @@ struct Rectangle {
     float h;
 };
 
-
-hloop_t *loop;
-hmutex_t locker;
+mutex locker;
 queue<input_events> input_queue;
 
 int screen_fd;
@@ -137,19 +131,10 @@ int open_device(const char *dev_name) {
             return -1;
         }
     }
-    hloge("Could not open %s, %s", dev_name, strerror(errno));
+    printf("Could not open %s, %s", dev_name, strerror(errno));
     return -1;
 }
 
-
-/*
-ImVec2 getTouchScreenDimension1(int fd) {
-    int abs_x[6], abs_y[6] = {0};
-    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_X), abs_x);
-    ioctl(fd, EVIOCGABS(ABS_MT_POSITION_Y), abs_y);
-    return {(float) abs_x[2], (float) abs_y[2]};
-}
-*/
 
 int scan_devices(int eventX) {
     const char *dirname = "/dev/input";
@@ -230,7 +215,7 @@ int create_uinput_device(int screenW, int screenH) {
     struct uinput_user_dev uinp;
     uinput_dev_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (uinput_dev_fd == 0) {
-        hloge("Unable to open /dev/uinput\n");
+        printf("Unable to open /dev/uinput\n");
         return -1;
     }
     memset(&uinp, 0, sizeof(uinp));
@@ -271,13 +256,11 @@ int create_uinput_device(int screenW, int screenH) {
     return uinput_dev_fd;
 }
 
-list<input_event> input_event_filter(input_event *events, int size) {
-    list<input_event> event;
-    for (int i = 0; i < size; i++) {
+vector<input_event> input_event_filter(vector<input_event> events) {
+    vector<input_event> event;
+    for (int i = 0; i < events.size(); i++) {
         if (events[i].type == EV_ABS || events[i].type == EV_SYN) {
             event.push_back(events[i]);
-        } else {
-            // printf("Filter: %d %d %d\n", events[i].type, events[i].code, events[i].value);
         }
     }
     return event;
@@ -346,7 +329,7 @@ vector<Rectangle> getAllWindowPositionsAndSizes() {
 }
 
 
-void on_queue_event(hevent_t *ev) {
+void on_queue_event() {
     if (!input_queue.empty()) {
         input_events events = input_queue.front();
         input_queue.pop();
@@ -387,28 +370,31 @@ void on_queue_event(hevent_t *ev) {
                 }
             }
         }
-
-        MDisplayInfo mDisplayInfo = getTouchDisplyInfo1();
-        ImVec2 point = rotatePointx1(mDisplayInfo.orientation, {(float) eventX, (float) eventY},
-                                     {(float) screen_width, (float) screen_height});
-        ImVec2 newEvent((point.x * (float) mDisplayInfo.width) / (float) screen_width,
-                        (point.y * (float) mDisplayInfo.height) / (float) screen_height);
-        ImGuInputEvent imGuInputEvent{};
-        imGuInputEvent.fingerIndex = fingerIndex;
-        imGuInputEvent.pos = newEvent;
-
         bool canTouch = true;
-        if (status == IM_DOWN) {           // 按下
-            imGuInputEvent.type = IM_DOWN;
-            // 获取所有窗口判断点击位置是否在窗口内部
-            vector<Rectangle> all = getAllWindowPositionsAndSizes();
-            canTouch = isPointInsideRectangles(newEvent, all);
-        } else if (status == IM_MOVE) {    // 移动
-            imGuInputEvent.type = IM_MOVE;
-        } else {                           // 放开
-            imGuInputEvent.type = IM_UP;
+
+        // 判断imgui是否可用
+        if (ImGui::GetCurrentContext()) {
+            MDisplayInfo mDisplayInfo = getTouchDisplyInfo1();
+            ImVec2 point = rotatePointx1(mDisplayInfo.orientation, {(float) eventX, (float) eventY},
+                                         {(float) screen_width, (float) screen_height});
+            ImVec2 newEvent((point.x * (float) mDisplayInfo.width) / (float) screen_width,
+                            (point.y * (float) mDisplayInfo.height) / (float) screen_height);
+            ImGuInputEvent imGuInputEvent{};
+            imGuInputEvent.fingerIndex = fingerIndex;
+            imGuInputEvent.pos = newEvent;
+            if (status == IM_DOWN) {           // 按下
+                imGuInputEvent.type = IM_DOWN;
+                // 获取所有窗口判断点击位置是否在窗口内部
+                vector<Rectangle> all = getAllWindowPositionsAndSizes();
+                canTouch = isPointInsideRectangles(newEvent, all);
+            } else if (status == IM_MOVE) {    // 移动
+                imGuInputEvent.type = IM_MOVE;
+            } else {                           // 放开
+                imGuInputEvent.type = IM_UP;
+            }
+            ImGui_ImplAndroid_HandleInputEvent(imGuInputEvent);
         }
-        ImGui_ImplAndroid_HandleInputEvent(imGuInputEvent);
+
         if (canTouch) {
             for (input_event ev: events.events) {
                 if (ev.type == EV_ABS) {
@@ -453,28 +439,24 @@ void on_queue_event(hevent_t *ev) {
     }
 }
 
-hevent_t queue_event_t{
-        .event_type = (hevent_type_e) (HEVENT_TYPE_CUSTOM),
-        .cb = on_queue_event};
 
-void post_queue_event() {
-    hloop_post_event(loop, &queue_event_t);
-}
-
-void on_input(hio_t *io, void *buf, int readbytes) {
-    input_event *event = static_cast<input_event *>(buf);
-    int nums = readbytes / sizeof(input_event);
-    input_events events = {
-            .type = FROM_SCREEN,
-            .events = input_event_filter(event, nums)};
-    // printf("on_input fd=%d readbytes=%d\n", hio_fd(io), readbytes);
-    // for (input_event ie : events.events) {
-    //     printf("SCREEN: %d %d %d\n", ie.type, ie.code, ie.value);
-    // }
-    hmutex_lock(&locker);
-    input_queue.push(events);
-    hmutex_unlock(&locker);
-    post_queue_event();
+void on_input() {
+    vector<input_event> events;
+    input_event event{};
+    while (read(screen_fd, &event, sizeof(event)) > 0) {
+        events.push_back(event);
+        if (event.type == EV_SYN && event.code == SYN_REPORT && event.value == 0) {
+            input_events e = {
+                    .type = FROM_SCREEN,
+                    .events = input_event_filter(events)};
+            locker.lock();
+            input_queue.push(e);
+            locker.unlock();
+            events.clear();
+            on_queue_event();
+        }
+    }
+    printf("on_input end\n");
 }
 
 
@@ -487,23 +469,26 @@ input_event make_event(__u16 type, __u16 code, __s32 value) {
 }
 
 void touchDown(long x, long y, long finger) {
-    list<input_event> event;
+    MDisplayInfo mDisplayInfo = getTouchDisplyInfo1();
+    ImVec2 newEvent((x * (float) screen_width / (float) mDisplayInfo.width),
+                    (y * (float) screen_height) / (float) mDisplayInfo.height);
+    vector<input_event> event;
     event.push_back(make_event(EV_ABS, ABS_MT_SLOT, finger));
     event.push_back(make_event(EV_ABS, ABS_MT_TRACKING_ID, finger));
-    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_X, x));
-    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_Y, y));
+    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_X, newEvent.x));
+    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_Y, newEvent.y));
     event.push_back(make_event(EV_SYN, 0, 0));
     input_events events = {
             .type = FROM_SOCKET,
             .events = event};
-    hmutex_lock(&locker);
+    locker.lock();
     input_queue.push(events);
-    hmutex_unlock(&locker);
-    post_queue_event();
+    locker.unlock();
+    on_queue_event();
 }
 
 void touchUp(long finger) {
-    list<input_event> event;
+    vector<input_event> event;
     finger_id[finger] = -1;
     event.push_back(make_event(EV_ABS, ABS_MT_SLOT, finger));
     event.push_back(make_event(EV_ABS, ABS_MT_TRACKING_ID, -1));
@@ -511,34 +496,29 @@ void touchUp(long finger) {
     input_events events = {
             .type = FROM_SOCKET,
             .events = event};
-    hmutex_lock(&locker);
+    locker.lock();
     input_queue.push(events);
-    hmutex_unlock(&locker);
-    post_queue_event();
+    locker.unlock();
+    on_queue_event();
 }
 
-int find_available_slot() {
-    for (int i = 0; i < 10; i++) {
-        if (finger_id[i] < 1) {
-            return i;
-        }
-    }
-    return -1;
-}
 
 void touchMove(long x, long y, long finger) {
-    list<input_event> event;
+    MDisplayInfo mDisplayInfo = getTouchDisplyInfo1();
+    ImVec2 newEvent((x * (float) screen_width / (float) mDisplayInfo.width),
+                    (y * (float) screen_height) / (float) mDisplayInfo.height);
+    vector<input_event> event;
     event.push_back(make_event(EV_ABS, ABS_MT_SLOT, finger));
-    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_X, x));
-    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_Y, y));
+    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_X, newEvent.x));
+    event.push_back(make_event(EV_ABS, ABS_MT_POSITION_Y, newEvent.y));
     event.push_back(make_event(EV_SYN, 0, 0));
     input_events events = {
             .type = FROM_SOCKET,
             .events = event};
-    hmutex_lock(&locker);
+    locker.lock();
     input_queue.push(events);
-    hmutex_unlock(&locker);
-    post_queue_event();
+    locker.unlock();
+    on_queue_event();
 }
 
 
@@ -552,20 +532,8 @@ void *initTouchDevice(int eventX) {
     //创建虚拟触摸设备
     uinput_fd = create_uinput_device(screen_width, screen_height);
 
-    //初始化线程锁
-    hmutex_init(&locker);
-
-    //创建loop
-    loop = hloop_new(0);
-    input_event event[8];
-
-    //创建input_event读取任务
-    hread(loop, screen_fd, event, sizeof(event), on_input);
-
-    //开始运行任务
-    hloop_run(loop);
-    //释放任务
-    hloop_free(&loop);
+    // 系统输入事件监听
+    on_input();
     //释放触摸句柄
     ioctl(screen_fd, EVIOCGRAB, UNGRAB);
     close(screen_fd);
@@ -574,7 +542,7 @@ void *initTouchDevice(int eventX) {
 }
 
 void closeTouch() {
-    hloop_stop(loop);
+    screen_fd = -1;
 }
 
 /**
