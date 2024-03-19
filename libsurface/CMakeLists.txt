@@ -28,7 +28,7 @@ FILE(GLOB_RECURSE GLOB_IMGUI_RECURSE # 遍历子目录下所有符合情况的�
 
 
 ##################### CMake源文件设置 #####################
-add_library(libsurface_static
+add_library(surface_static
         STATIC
         ${FILE_INCLUDES}
         ${FILE_SOURCES}
@@ -39,7 +39,7 @@ add_library(libsurface_static
 add_library(hv_static STATIC IMPORTED)
 set_target_properties(hv_static PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libhv_static/lib/${ANDROID_ABI}/libhv_static.a)
 
-target_link_libraries(libsurface_static PRIVATE EGL GLESv3 log android GLESv2 m dl
+target_link_libraries(surface_static PRIVATE EGL GLESv3 log android GLESv2 m dl
         mediandk
         hv_static
 )

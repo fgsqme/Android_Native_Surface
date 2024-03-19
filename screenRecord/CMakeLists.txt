@@ -32,10 +32,10 @@ add_executable(nativeRecordReceive # 生成可执行文件
         recordReceive.cpp
 )
 
-target_link_libraries(nativeScreenRecord PRIVATE libsurface_static)
+target_link_libraries(nativeScreenRecord PRIVATE surface_static)
 
 target_link_libraries(nativeRecordReceive PRIVATE
-        libsurface_static
+        surface_static
         log
         m
         z
