@@ -12,7 +12,7 @@ extern Draw *draw;
  */
 int main(int argc, char *argv[]) {
     // 在此初始化OpenGL 或者 Vulkan
-    draw = new DrawOpenGL(); // DrawVulkan /  DrawOpenGL
+    draw = new DrawVulkan(); // DrawVulkan /  DrawOpenGL
     // 初始化imgui
     if (!draw->initDraw(false)) {
         return -1;
@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
                     "This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
             ImGui::Checkbox("Another Window", &show_another_window);
+            // 跳过录屏
             ImGui::Checkbox("DisableRecord", &disableRecord);      // Edit bools storing our window open/close state
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f

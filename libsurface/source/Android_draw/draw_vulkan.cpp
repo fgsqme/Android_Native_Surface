@@ -126,8 +126,10 @@ bool DrawVulkan::drawBegin() {
         orientation = displayInfo.orientation;
         printf("width: %d height: %d height: %d\n", displayInfo.width, displayInfo.height, displayInfo.orientation);
         shutdown();
+        initDraw();
         flag = true;
     }
+
     ImGui_ImplVulkan_NewFrame();
 
     if (g_SwapChainRebuild) {
