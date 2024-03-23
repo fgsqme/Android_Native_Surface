@@ -12,7 +12,7 @@ extern Draw *draw;
  */
 int main(int argc, char *argv[]) {
     // 在此初始化OpenGL 或者 Vulkan
-    draw = new DrawVulkan(); // DrawVulkan /  DrawOpenGL
+    draw = new DrawOpenGL(); // DrawVulkan /  DrawOpenGL
     // 初始化imgui
     if (!draw->initDraw(false)) {
         return -1;
@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
         bool resetPos = draw->drawBegin();
         static bool show_demo_window = false;
         static bool show_another_window = false;
+        static bool disableRecord = false;
 
         if (show_demo_window) {
             ImGui::ShowDemoWindow(&show_demo_window);
@@ -42,6 +43,8 @@ int main(int argc, char *argv[]) {
                     "This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
             ImGui::Checkbox("Another Window", &show_another_window);
+            ImGui::Checkbox("DisableRecord", &disableRecord);      // Edit bools storing our window open/close state
+
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit4("clear color", (float *) &clear_color); // Edit 3 floats representing a color
             if (ImGui::Button("Button")) {
@@ -55,6 +58,7 @@ int main(int argc, char *argv[]) {
             if (ImGui::Button("exit")) {
                 flag = false;
             }
+
             ImGui::End();
         }
 
@@ -69,6 +73,7 @@ int main(int argc, char *argv[]) {
         }
         // imgui画图结束调用
         draw->drawEnd();
+        draw->setDisableRecordState(disableRecord);
 //        std::this_thread::sleep_for(1ms);
     }
     closeTouch();

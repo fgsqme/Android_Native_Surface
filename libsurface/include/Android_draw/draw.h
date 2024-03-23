@@ -27,12 +27,15 @@ public:
 public:
     virtual ~Draw() = default;
 
+    // 初始化
     virtual bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) = 0;
 
     virtual bool initDraw(int flags = 0,bool log = false) = 0;
 
+    // 跳过 / 不跳过 录屏
     virtual void setDisableRecordState(bool b) = 0;
 
+    // 获取屏幕当前绝对宽高和旋转状态
     virtual void screen_config() = 0;
 
     virtual bool drawBegin() = 0;

@@ -102,8 +102,14 @@ bool DrawVulkan::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
 
 void DrawVulkan::setDisableRecordState(bool b) {
     if (disableRecord != b) {
-        shutdown();
-        initDraw();
+        if (b) {
+            shutdown();
+            initDraw(0x40);
+        } else {
+            shutdown();
+            initDraw();
+        }
+        disableRecord = b;
     }
 }
 
@@ -115,14 +121,11 @@ void DrawVulkan::screen_config() {
 bool DrawVulkan::drawBegin() {
     screen_config();
 
-
-
     bool flag = false;
     if (orientation != displayInfo.orientation) {
         orientation = displayInfo.orientation;
         printf("width: %d height: %d height: %d\n", displayInfo.width, displayInfo.height, displayInfo.orientation);
         shutdown();
-        initDraw();
         flag = true;
     }
     ImGui_ImplVulkan_NewFrame();

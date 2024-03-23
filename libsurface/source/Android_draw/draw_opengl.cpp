@@ -142,8 +142,14 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
 
 void DrawOpenGL::setDisableRecordState(bool b) {
     if (disableRecord != b) {
-        shutdown();
-        initDraw();
+        if (b) {
+            shutdown();
+            initDraw(0x40);
+        } else {
+            shutdown();
+            initDraw();
+        }
+        disableRecord = b;
     }
 }
 
