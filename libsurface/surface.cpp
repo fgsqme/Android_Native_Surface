@@ -3,13 +3,18 @@
 //
 #include "draw.h"
 #include "touch.h"
+#include "imgui.h"
+
+extern Draw *draw;
 
 /**
  * imgui测试
  */
 int main(int argc, char *argv[]) {
+    // 在此初始化OpenGL 或者 Vulkan
+    draw = new DrawVulkan(); // DrawVulkan /  DrawOpenGL
     // 初始化imgui
-    if (!initDraw(true)) {
+    if (!draw->initDraw(false)) {
         return -1;
     }
     initTouch();
@@ -17,7 +22,7 @@ int main(int argc, char *argv[]) {
     bool flag = true;
     while (flag) {
         // imgui画图开始前调用
-        drawBegin();
+        bool resetPos = draw->drawBegin();
         static bool show_demo_window = false;
         static bool show_another_window = false;
 
@@ -28,7 +33,11 @@ int main(int argc, char *argv[]) {
             static float f = 0.0f;
             static int counter = 0;
             static ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+            if (resetPos) {
+                ImGui::SetNextWindowPos({100, 100});
+            }
             ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
+
             ImGui::Text(
                     "This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
@@ -59,11 +68,12 @@ int main(int argc, char *argv[]) {
             ImGui::End();
         }
         // imgui画图结束调用
-        drawEnd();
-        std::this_thread::sleep_for(1ms);
+        draw->drawEnd();
+//        std::this_thread::sleep_for(1ms);
     }
-    shutdown();
     closeTouch();
+    draw->shutdown();
+    delete draw;
     return 0;
 }
 

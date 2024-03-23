@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 # 设置NDK路径
-set(NDK_PATH D:/MDK/android-ndk-r20b)
+set(NDK_PATH C:/MDK/android-ndk-r20b)
 
 ##################### Android设置 #####################
 set(CMAKE_SYSTEM_NAME ANDROID) # 设置目标编译平台参数 Android
@@ -19,6 +19,5 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(libsurface)
 add_subdirectory(screenRecord)
-add_subdirectory(examples)
 
 

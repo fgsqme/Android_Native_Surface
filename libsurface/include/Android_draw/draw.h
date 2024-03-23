@@ -12,35 +12,67 @@
 //#include <touch.h>
 #include "extern_function.h"
 
+class Draw {
+public:
+    ANativeWindow *native_window;
+    ExternFunction externFunction;
+    bool g_Initialized = false;
+    uint32_t orientation = 0;
+    bool disableRecord = false;
+    MDisplayInfo displayInfo;
+    int width;
+    int height;
 
-// namespace
-using namespace std;
-using namespace std::chrono_literals;
-//extern EGLDisplay display;
-//extern EGLConfig config;
-//extern EGLSurface surface;
-//extern ANativeWindow *native_window;
-extern ExternFunction externFunction;
-//extern EGLContext context;
-// 屏幕信息
-extern MDisplayInfo displayInfo;
-extern bool g_Initialized;
 
-// Func
-bool init_egl(uint32_t _screen_x, uint32_t _screen_y, bool log = false);
+public:
+    virtual ~Draw() = default;
 
-bool initDraw(uint32_t _screen_x, uint32_t _screen_y, bool log = false);
+    virtual bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) = 0;
 
-bool initDraw(bool log = false);
+    virtual bool initDraw(int flags = 0,bool log = false) = 0;
 
-bool ImGui_init();
+    virtual void setDisableRecordState(bool b) = 0;
 
-void screen_config();
+    virtual void screen_config() = 0;
 
-void drawBegin();
+    virtual bool drawBegin() = 0;
 
-void drawEnd();
+    virtual void drawEnd() = 0;
 
-void shutdown();
+    virtual void shutdown() = 0;
+
+};
+
+class DrawOpenGL : public Draw {
+    bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) override;
+
+    bool initDraw(int flags = 0,bool log = false) override;
+
+    void screen_config() override;
+
+    void setDisableRecordState(bool b) override;
+
+    bool drawBegin() override;
+
+    void drawEnd() override;
+
+    void shutdown() override;
+};
+
+class DrawVulkan : public Draw {
+    bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) override;
+
+    bool initDraw(int flags = 0,bool log = false) override;
+
+    void screen_config() override;
+
+    void setDisableRecordState(bool b) override;
+
+    bool drawBegin() override;
+
+    void drawEnd() override;
+
+    void shutdown() override;
+};
 
 #endif //NATIVESURFACE_DRAW_H

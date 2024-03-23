@@ -14,14 +14,12 @@
 #include "draw.h"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "imgui_impl_opengl3.h"
 #include "imgui_impl_android.h"
 
 #include <linux/input.h>
 #include <linux/uinput.h>
 #include <sys/ioctl.h>
 
-#include <algorithm>
 #include <iostream>
 #include <queue>
 #include <random>
@@ -63,6 +61,8 @@ int finger_down = 0;
 int current_slot = 0;
 int current_screen_slot = 0;
 int finger_id[11];
+
+Draw *draw;
 
 static int abs_parse(int fd) {
     uint8_t *bits = NULL;
@@ -272,10 +272,11 @@ vector<input_event> input_event_filter(vector<input_event> events) {
 }
 
 MDisplayInfo getTouchDisplyInfo1() {
-    if (displayInfo.orientation == 0 || displayInfo.orientation == 2) {
-        return displayInfo;
+
+    if (draw->displayInfo.orientation == 0 || draw->displayInfo.orientation == 2) {
+        return {draw->displayInfo.width, draw->displayInfo.height, draw->displayInfo.orientation};;
     } else {
-        return {displayInfo.height, displayInfo.width, displayInfo.orientation};
+        return {draw->displayInfo.height, draw->displayInfo.width, draw->displayInfo.orientation};
     }
 }
 

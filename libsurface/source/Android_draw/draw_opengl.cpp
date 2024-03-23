@@ -1,32 +1,24 @@
+#include "draw.h"
+
+
 //
 // Created by 泓清 on 2022/8/26.
 //
 
 #include "draw.h"
-//#include <font/Font.h>
+#include <font/Font.h>
 
 // User libs
-//#include <touch.h>
+
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_android.h"
 
 #include <EGL/egl.h>
-#include <GLES/gl.h>
 #include <dlfcn.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <cstdio>
-#include <cstring>
-#include <cerrno>
 #include <android/native_window.h>
-#include <Egl/eglext.h>
-#include <GLES3/gl3platform.h>
-#include <GLES3/gl3ext.h>
 #include <GLES3/gl32.h>
 
 
@@ -34,29 +26,32 @@
 EGLDisplay display = EGL_NO_DISPLAY;
 EGLConfig config;
 EGLSurface surface = EGL_NO_SURFACE;
-ANativeWindow *native_window;
-ExternFunction externFunction;
 EGLContext context = EGL_NO_CONTEXT;
-MDisplayInfo displayInfo;
-uint32_t orientation = 0;
-bool g_Initialized = false;
 
-bool initDraw(bool log) {
+
+bool DrawOpenGL::initDraw(int flags, bool log) {
     screen_config();
     orientation = displayInfo.orientation;
-    return initDraw(displayInfo.width, displayInfo.height, log);
+    return initDraw(displayInfo.width, displayInfo.height, flags, log);
+
 }
 
-bool initDraw(uint32_t _screen_x, uint32_t _screen_y, bool log) {
-    if (!init_egl(_screen_x, _screen_y, log)) {
-        return false;
+bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, bool log) {
+    width = _screen_x;
+    height = _screen_y;
+    if (g_Initialized) {
+        return true;
     }
-    return ImGui_init();
-}
-
-bool init_egl(uint32_t _screen_x, uint32_t _screen_y, bool log) {
+    int f = 0;
+    // 解决安卓14触摸失效问题
+    if (get_android_api_level() >= 33) {
+        f |= 0x2000;
+    }
+    if (flags > 0) {
+        f |= flags;
+    }
     native_window = externFunction.createNativeWindow("Ssage",
-                                                      _screen_x, _screen_y, false);
+                                                      _screen_x, _screen_y, 1, f, false);
     ANativeWindow_acquire(native_window);
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (display == EGL_NO_DISPLAY) {
@@ -90,7 +85,6 @@ bool init_egl(uint32_t _screen_x, uint32_t _screen_y, bool log) {
             3,
             EGL_NONE
     };
-
     if (log) {
         printf("num_config=%d\n", num_config);
     }
@@ -128,21 +122,11 @@ bool init_egl(uint32_t _screen_x, uint32_t _screen_y, bool log) {
         printf("eglMakeCurrent ok\n");
         printf("createNativeWindow ok\n");
     }
-    return true;
-}
-
-void screen_config() {
-    displayInfo = externFunction.getDisplayInfo();
-}
-
-bool ImGui_init() {
-    if (g_Initialized) {
-        return true;
-    }
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     io.IniFilename = NULL;
+    io.DisplaySize = ImVec2((float) _screen_x, (float) _screen_y);
     ImGui::StyleColorsDark();
     ImGui_ImplAndroid_Init(native_window);
     ImGui_ImplOpenGL3_Init("#version 300 es");
@@ -156,20 +140,35 @@ bool ImGui_init() {
     return true;
 }
 
-void drawBegin() {
-    screen_config();
-    if (orientation != displayInfo.orientation) {
+void DrawOpenGL::setDisableRecordState(bool b) {
+    if (disableRecord != b) {
         shutdown();
         initDraw();
+    }
+}
+
+void DrawOpenGL::screen_config() {
+    displayInfo = externFunction.getDisplayInfo();
+}
+
+
+bool DrawOpenGL::drawBegin() {
+    screen_config();
+    bool flag = false;
+    if (orientation != displayInfo.orientation) {
         orientation = displayInfo.orientation;
         printf("width: %d height: %d height: %d\n", displayInfo.width, displayInfo.height, displayInfo.orientation);
+        shutdown();
+        initDraw();
+        flag = true;
     }
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame();
     ImGui::NewFrame();
+    return flag;
 }
 
-void drawEnd() {
+void DrawOpenGL::drawEnd() {
     ImGuiIO &io = ImGui::GetIO();
     glViewport(0.0f, 0.0f, (int) io.DisplaySize.x, (int) io.DisplaySize.y);
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -184,7 +183,7 @@ void drawEnd() {
 }
 
 
-void shutdown() {
+void DrawOpenGL::shutdown() {
     if (!g_Initialized) {
         return;
     }

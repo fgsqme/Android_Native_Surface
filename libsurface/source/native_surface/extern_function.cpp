@@ -109,13 +109,9 @@ ExternFunction::ExternFunction() {
 ANativeWindow *
 ExternFunction::createNativeWindow(const char *surface_name, uint32_t screen_width, uint32_t screen_height,
                                    bool author) {
-    if (get_android_api_level() >= 33) {
-        return createNativeWindow(surface_name, screen_width, screen_height, 1, 0x2000, author);
-    } else {
-        return ((ANativeWindow *(*)(
-                const char *, uint32_t, uint32_t, bool))
-                (funcPointer.func_createNativeWindow))(surface_name, screen_width, screen_height, author);
-    }
+    return ((ANativeWindow *(*)(
+            const char *, uint32_t, uint32_t, bool))
+            (funcPointer.func_createNativeWindow))(surface_name, screen_width, screen_height, author);
 }
 
 /**

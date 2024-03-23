@@ -3,6 +3,13 @@ project(libsurface)
 
 ##################### 输出文件重定向 #####################
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/outputs/lib/${CMAKE_ANDROID_ARCH_ABI}/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/outputs/exec/${CMAKE_ANDROID_ARCH_ABI}/)
+
+# Add definitions
+add_compile_definitions(VK_USE_PLATFORM_ANDROID_KHR)
+#add_compile_definitions(IMGUI_IMPL_VULKAN_NO_PROTOTYPES)
+add_compile_definitions(VK_NO_PROTOTYPES)
+
 ##################### CMake头文件设置 #####################
 # 遍历子目录下所有符合情况的头文件
 FILE(GLOB_RECURSE FILE_INCLUDES include/*.h*)
@@ -35,9 +42,15 @@ add_library(surface_static
         ${GLOB_IMGUI_RECURSE}
 )
 
+add_executable(nativeSurface # 生成可执行文件
+        surface.cpp
+)
+
 
 target_link_libraries(surface_static PRIVATE EGL GLESv3 log android GLESv2 m dl
         mediandk)
+
+target_link_libraries(nativeSurface PRIVATE EGL GLESv3 log android GLESv2 surface_static)
 
 #####################复制头文件#######################
 # 设置要复制的头文件的路径
