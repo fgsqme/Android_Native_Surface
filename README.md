@@ -5,11 +5,8 @@
 [此项目基于 Android_Native_Surface](https://github.com/SsageParuders/Android_Native_Surface)
 
 ### 功能
-
-- Android c++ 绘制和录屏，目前只测试了安卓12和12.1，触摸穿透只在安卓13/14设备测试正常，安卓14卡触摸已修复在x86_64设备上测试无问题，其他版本需要自行测试
-
-### libs
-
+- c++ surface 绘制，支持 OpenGL和Vulkan，支持跳过录屏，已修复触摸穿透问题
+- c++ 录屏 / 录屏共享
 - 项目支持到 Android 9 ~ 14
 ### 目录
 - [libsurface](libsurface) c++ 绘制库
