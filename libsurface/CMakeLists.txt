@@ -47,12 +47,10 @@ add_executable(nativeSurface # 生成可执行文件
 )
 
 
-target_link_libraries(surface_static PRIVATE EGL GLESv3 log android GLESv2 m dl
-        mediandk)
+target_link_libraries(surface_static PRIVATE EGL GLESv3 log android GLESv2)
 
 target_link_libraries(nativeSurface PRIVATE EGL GLESv3 log android GLESv2 surface_static)
 
-#####################复制头文件#######################
 # 设置要复制的头文件的路径
 set(HEADER_DIR include)
 # 设置要复制到的目标文件夹
@@ -61,4 +59,16 @@ set(HEADER_DEST_DIR ${CMAKE_SOURCE_DIR}/outputs/include)
 file(MAKE_DIRECTORY ${HEADER_DEST_DIR})
 # 复制头文件
 file(GLOB_RECURSE HEADER_FILES ${HEADER_DIR}/*.h)
-file(COPY ${HEADER_FILES} DESTINATION ${HEADER_DEST_DIR})
+message("Header files: ${HEADER_FILES}")
+
+# 复制头文件
+add_custom_command(
+        TARGET surface_static POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${HEADER_FILES} ${HEADER_DEST_DIR}
+        COMMENT "Copying header files to ${HEADER_DEST_DIR}"
+)
+
+
+
+
+

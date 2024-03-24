@@ -31,63 +31,62 @@ void check_vk_result(VkResult err) {
 
 
 VkPhysicalDevice SetupVulkan_SelectPhysicalDevice() {
-    uint32_t gpu_count;
-    VkResult err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, nullptr);
-    check_vk_result(err);
-    IM_ASSERT(gpu_count > 0);
+    uint32_t gpu_count; // GPU数量
+    VkResult err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, nullptr); // 获取物理设备列表
+    check_vk_result(err); // 检查Vulkan函数调用结果
+    IM_ASSERT(gpu_count > 0); // 断言GPU数量大于0
 
-    ImVector<VkPhysicalDevice> gpus;
-    gpus.resize(gpu_count);
-    err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, gpus.Data);
-    check_vk_result(err);
+    ImVector<VkPhysicalDevice> gpus; // 存储物理设备的向量
+    gpus.resize(gpu_count); // 调整向量大小以容纳物理设备数量
+    err = vkEnumeratePhysicalDevices(g_Instance, &gpu_count, gpus.Data); // 获取物理设备列表
+    check_vk_result(err); // 检查Vulkan函数调用结果
 
-    // If a number >1 of GPUs got reported, find discrete GPU if present, or use first one available. This covers
-    // most common cases (multi-gpu/integrated+dedicated graphics). Handling more complicated setups (multiple
-    // dedicated GPUs) is out of scope of this sample.
-    for (VkPhysicalDevice &device: gpus) {
-        VkPhysicalDeviceProperties properties;
-        vkGetPhysicalDeviceProperties(device, &properties);
-        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
-            return device;
+    // 如果报告了多于一个GPU的数量，则查找独立GPU（如果存在），否则使用第一个可用的GPU。这涵盖了
+    // 大多数常见情况（多GPU/集成+独立图形）。处理更复杂的设置（多个
+    // 专用GPU）不在本示例的范围内。
+    for (VkPhysicalDevice &device: gpus) { // 遍历物理设备列表
+        VkPhysicalDeviceProperties properties; // 物理设备属性
+        vkGetPhysicalDeviceProperties(device, &properties); // 获取物理设备属性
+        if (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) // 如果是独立GPU
+            return device; // 返回该设备
     }
-    if (gpu_count > 0)
-        return gpus[0];
-    return VK_NULL_HANDLE;
+    if (gpu_count > 0) // 如果有GPU可用
+        return gpus[0]; // 返回第一个GPU
+    return VK_NULL_HANDLE; // 返回空句柄
 }
 
 void SetupVulkan(std::vector<const char *> instance_extensions) {
     VkResult err;
-    // Create Vulkan Instance
+    // 创建 Vulkan 实例
     {
         VkInstanceCreateInfo create_info = {};
         create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
-        // Create Vulkan Instance
+        // 设置 Vulkan 实例
         create_info.enabledExtensionCount = (uint32_t) instance_extensions.size();
         create_info.ppEnabledExtensionNames = instance_extensions.data();
 
-        VkApplicationInfo appInfo = {
-                .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-                .pNext = nullptr,
-                .pApplicationName = "pApplicationName",
-                .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-                .pEngineName = "pEngineName",
-                .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-                .apiVersion = VK_MAKE_VERSION(1, 1, 0),
-        };
+        VkApplicationInfo appInfo{};
+        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName = "Hello Triangle";
+        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.pEngineName = "No Engine";
+        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.apiVersion = VK_API_VERSION_1_0;
+
         create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         create_info.pApplicationInfo = &appInfo;
         // 创建不带任何调试特性的 Vulkan 实例
         err = vkCreateInstance(&create_info, g_Allocator, &g_Instance);
         check_vk_result(err);
 
-        // Setup the debug report callback
+        // 设置调试报告回调
     }
 
-    // Select Physical Device (GPU)
+    // 选择物理设备（GPU）
     g_PhysicalDevice = SetupVulkan_SelectPhysicalDevice();
 
-    // Select graphics queue family
+    // 选择图形队列家族
     {
         uint32_t count;
         vkGetPhysicalDeviceQueueFamilyProperties(g_PhysicalDevice, &count, nullptr);
@@ -104,12 +103,12 @@ void SetupVulkan(std::vector<const char *> instance_extensions) {
         IM_ASSERT(g_QueueFamily != (uint32_t) -1);
     }
 
-    // Create Logical Device (with 1 queue)
+    // 创建逻辑设备（带有1个队列）
     {
         ImVector<const char *> device_extensions;
         device_extensions.push_back("VK_KHR_swapchain");
 
-        // Enumerate physical device extension
+        // 枚举物理设备扩展
         uint32_t properties_count;
         ImVector<VkExtensionProperties> properties;
         vkEnumerateDeviceExtensionProperties(g_PhysicalDevice, nullptr, &properties_count, nullptr);
@@ -133,7 +132,7 @@ void SetupVulkan(std::vector<const char *> instance_extensions) {
         vkGetDeviceQueue(g_Device, g_QueueFamily, 0, &g_Queue);
     }
 
-    // Create Descriptor Pool
+    // 创建描述符池
     {
         VkDescriptorPoolSize pool_sizes[] =
                 {
@@ -160,20 +159,19 @@ void SetupVulkan(std::vector<const char *> instance_extensions) {
     }
 }
 
-// All the ImGui_ImplVulkanH_XXX structures/functions are optional helpers used by the demo.
-// Your real engine/app may not use them.
-void SetupVulkanWindow(ImGui_ImplVulkanH_Window *wd, VkSurfaceKHR surface, int width, int height) {
-    wd->Surface = surface;
 
-    // Check for WSI support
+void SetupVulkanWindow(ImGui_ImplVulkanH_Window *wd, VkSurfaceKHR surface, int width, int height) {
+    wd->Surface = surface; // 设置窗口表面
+
+    // 检查WSI支持
     VkBool32 res;
     vkGetPhysicalDeviceSurfaceSupportKHR(g_PhysicalDevice, g_QueueFamily, wd->Surface, &res);
-    if (res != VK_TRUE) {
+    if (res != VK_TRUE) { // 如果不支持WSI
         fprintf(stderr, "Error no WSI support on physical device 0\n");
         exit(-1);
     }
 
-    // Select Surface Format
+    // 选择表面格式
     const VkFormat requestSurfaceImageFormat[] = {VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM,
                                                   VK_FORMAT_B8G8R8_UNORM, VK_FORMAT_R8G8B8_UNORM};
     const VkColorSpaceKHR requestSurfaceColorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
@@ -181,32 +179,39 @@ void SetupVulkanWindow(ImGui_ImplVulkanH_Window *wd, VkSurfaceKHR surface, int w
                                                               (size_t) IM_ARRAYSIZE(requestSurfaceImageFormat),
                                                               requestSurfaceColorSpace);
 
-    // Select Present Mode
+    // 选择呈现模式
     VkPresentModeKHR present_modes[] = {VK_PRESENT_MODE_FIFO_KHR};
     wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(g_PhysicalDevice, wd->Surface, &present_modes[0],
                                                           IM_ARRAYSIZE(present_modes));
     //printf("[vulkan] Selected PresentMode = %d\n", wd->PresentMode);
-    // Create SwapChain, RenderPass, Framebuffer, etc.
+    // 创建交换链、渲染通道、帧缓冲区等
     IM_ASSERT(g_MinImageCount >= 2);
     ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, wd, g_QueueFamily, g_Allocator,
                                            width, height, g_MinImageCount);
 }
 
+
 void CleanupVulkan() {
+    // 销毁描述符池
     vkDestroyDescriptorPool(g_Device, g_DescriptorPool, g_Allocator);
+    // 销毁逻辑设备
     vkDestroyDevice(g_Device, g_Allocator);
+    // 销毁 Vulkan 实例
     vkDestroyInstance(g_Instance, g_Allocator);
 }
 
 void CleanupVulkanWindow() {
+    // 销毁窗口相关资源
     ImGui_ImplVulkanH_DestroyWindow(g_Instance, g_Device, &g_MainWindowData, g_Allocator);
 }
+
 
 void FrameRender(ImGui_ImplVulkanH_Window *wd, ImDrawData *draw_data) {
     VkResult err;
 
     VkSemaphore image_acquired_semaphore = wd->FrameSemaphores[wd->SemaphoreIndex].ImageAcquiredSemaphore;
     VkSemaphore render_complete_semaphore = wd->FrameSemaphores[wd->SemaphoreIndex].RenderCompleteSemaphore;
+    // 获取下一帧图像
     err = vkAcquireNextImageKHR(g_Device, wd->Swapchain, UINT64_MAX, image_acquired_semaphore, VK_NULL_HANDLE,
                                 &wd->FrameIndex);
     if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR) {
@@ -217,14 +222,17 @@ void FrameRender(ImGui_ImplVulkanH_Window *wd, ImDrawData *draw_data) {
 
     ImGui_ImplVulkanH_Frame *fd = &wd->Frames[wd->FrameIndex];
     {
+        // 等待之前提交的命令完成
         err = vkWaitForFences(g_Device, 1, &fd->Fence, VK_TRUE,
-                              UINT64_MAX);    // wait indefinitely instead of periodically checking
+                              UINT64_MAX);    // 等待，而不是周期性检查
         check_vk_result(err);
 
+        // 重置fence
         err = vkResetFences(g_Device, 1, &fd->Fence);
         check_vk_result(err);
     }
     {
+        // 重置命令池
         err = vkResetCommandPool(g_Device, fd->CommandPool, 0);
         check_vk_result(err);
         VkCommandBufferBeginInfo info = {};
@@ -242,13 +250,14 @@ void FrameRender(ImGui_ImplVulkanH_Window *wd, ImDrawData *draw_data) {
         info.renderArea.extent.height = wd->Height;
         info.clearValueCount = 1;
         info.pClearValues = &wd->ClearValue;
+        // 开始渲染通道
         vkCmdBeginRenderPass(fd->CommandBuffer, &info, VK_SUBPASS_CONTENTS_INLINE);
     }
 
-    // Record dear imgui primitives into command buffer
+    // 将 dear imgui 绘制数据记录到命令缓冲区中
     ImGui_ImplVulkan_RenderDrawData(draw_data, fd->CommandBuffer);
 
-    // Submit command buffer
+    // 结束渲染通道
     vkCmdEndRenderPass(fd->CommandBuffer);
     {
         VkPipelineStageFlags wait_stage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -264,6 +273,7 @@ void FrameRender(ImGui_ImplVulkanH_Window *wd, ImDrawData *draw_data) {
 
         err = vkEndCommandBuffer(fd->CommandBuffer);
         check_vk_result(err);
+        // 提交命令缓冲区
         err = vkQueueSubmit(g_Queue, 1, &info, fd->Fence);
         check_vk_result(err);
     }
@@ -286,6 +296,5 @@ void FramePresent(ImGui_ImplVulkanH_Window *wd) {
         return;
     }
     check_vk_result(err);
-    wd->SemaphoreIndex = (wd->SemaphoreIndex + 1) % wd->ImageCount; // Now we can use the next set of semaphores
+    wd->SemaphoreIndex = (wd->SemaphoreIndex + 1) % wd->ImageCount; // 现在可以使用下一组信号量
 }
-

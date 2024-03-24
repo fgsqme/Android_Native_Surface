@@ -37,22 +37,25 @@ bool DrawOpenGL::initDraw(int flags, bool log) {
 }
 
 bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, bool log) {
-    width = _screen_x;
-    height = _screen_y;
-    if (g_Initialized) {
+    width = _screen_x;   // 设置屏幕宽度
+    height = _screen_y;  // 设置屏幕高度
+    if (g_Initialized) { // 如果已经初始化过，直接返回true
         return true;
     }
     int f = 0;
-    // 解决安卓14触摸失效问题
-    if (get_android_api_level() >= 33) {
+    // 解决安卓14触摸失效问题（特定情况下设置标志位）
+    if (get_android_api_level() >= 32) {
         f |= 0x2000;
     }
     if (flags > 0) {
         f |= flags;
     }
+    // 创建一个NativeWindow，用于OpenGL绘制
     native_window = externFunction.createNativeWindow("Ssage",
                                                       _screen_x, _screen_y, 1, f, false);
+    // 增加NativeWindow的引用计数
     ANativeWindow_acquire(native_window);
+    // 获取EGL显示设备
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     if (display == EGL_NO_DISPLAY) {
         printf("eglGetDisplay error=%u\n", glGetError());
@@ -68,6 +71,7 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
     if (log) {
         printf("eglInitialize ok\n");
     }
+    // 定义EGL配置属性数组
     EGLint num_config = 0;
     const EGLint attribList[] = {
             EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -88,6 +92,7 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
     if (log) {
         printf("num_config=%d\n", num_config);
     }
+    // 选择EGL配置
     if (eglChooseConfig(display, attribList, &config, 1, &num_config) != EGL_TRUE) {
         printf("eglChooseConfig  error=%u\n", glGetError());
         return false;
@@ -95,9 +100,12 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
     if (log) {
         printf("eglChooseConfig ok\n");
     }
+    // 获取EGL配置中的原生可视ID
     EGLint egl_format;
     eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &egl_format);
+    // 设置NativeWindow的缓冲区几何属性
     ANativeWindow_setBuffersGeometry(native_window, 0, 0, egl_format);
+    // 创建EGL上下文
     context = eglCreateContext(display, config, EGL_NO_CONTEXT, attrib_list);
     if (context == EGL_NO_CONTEXT) {
         printf("eglCreateContext  error = %u\n", glGetError());
@@ -106,6 +114,7 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
     if (log) {
         printf("eglCreateContext ok\n");
     }
+    // 创建EGL窗口表面
     surface = eglCreateWindowSurface(display, config, native_window, nullptr);
     if (surface == EGL_NO_SURFACE) {
         printf("eglCreateWindowSurface  error = %u\n", glGetError());
@@ -114,6 +123,7 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
     if (log) {
         printf("eglCreateWindowSurface ok\n");
     }
+    // 将当前线程的EGL上下文设置为当前上下文
     if (!eglMakeCurrent(display, surface, surface, context)) {
         printf("eglMakeCurrent  error = %u\n", glGetError());
         return false;
@@ -122,6 +132,7 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
         printf("eglMakeCurrent ok\n");
         printf("createNativeWindow ok\n");
     }
+    // 初始化ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
@@ -133,11 +144,10 @@ bool DrawOpenGL::initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags, boo
     ImFontConfig font_cfg;
     font_cfg.SizePixels = 22.0f;
     io.Fonts->AddFontDefault(&font_cfg);
-//    ImFontConfig font_cfg;
-//    io.Fonts->AddFontFromMemoryTTF((void*)OPPOSans_H, OPPOSans_H_size, 22.0f, &font_cfg);
+    // 添加字体并调整UI尺寸
     ImGui::GetStyle().ScaleAllSizes(3.0f);
-    g_Initialized = true;
-    return true;
+    g_Initialized = true; // 标记为已经初始化
+    return true; // 返回初始化成功
 }
 
 void DrawOpenGL::setDisableRecordState(bool b) {
