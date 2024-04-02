@@ -13,10 +13,10 @@ using namespace std;
  * @return
  */
 int main(int argv, char **argc) {
-    ifstream in_file("D:\\Project\\C++\\Android_Native_Surface\\libs\\armeabi-v7a\\aosp_14\\libSsage.so",
+    ifstream in_file("Z:\\OpenSource\\aosp_9\\out\\target\\product\\generic_arm64\\system\\lib64\\libSsage.so",
                      ios::in | ios::binary);
     filebuf buf;
-    buf.open("D:\\Project\\C++\\Android_Native_Surface\\include\\native_surface\\aosp\\dev.h", ios::out);
+    buf.open("C:\\Project\\C++\\Android_Native_Surface\\libsurface\\private_include\\aosp\\dev.h", ios::out);
     ostream os_file(&buf);
     in_file.seekg(0, std::ios::end);
     int len = in_file.tellg();

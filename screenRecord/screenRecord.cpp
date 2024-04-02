@@ -11,7 +11,7 @@
 FILE *fp;
 // 录屏flag，设置false退出录屏
 bool flag = true;
-TCPClient *tcpClient;
+//TCPClient *tcpClient;
 mlong currentTime = TimeTools::getCurrentTime();
 int fps = 0;
 int ffps = 0;
@@ -43,13 +43,13 @@ void callback(uint8_t *buff, size_t size) {
     DataEnc dataEnc(byte, DataEnc::headerSize() + (int) size);
     // 设置数据包下标
     dataEnc.setDataIndex((int) size);
-    //printf("size: %zu getDataLen:%d fps:%d\n", size, dataEnc->getDataLen(), fps);
+    printf("size: %zu getDataLen:%d fps:%d\n", size, dataEnc.getDataLen(), fps);
     // 将buff发送
-    if (!tcpClient->send(dataEnc.getData(), dataEnc.getDataLen())) {
-        // 发送失败退出录屏
-        printf("Failed to send buffer\n");
-        flag = false;
-    }
+//    if (!tcpClient->send(dataEnc.getData(), dataEnc.getDataLen())) {
+//        // 发送失败退出录屏
+//        printf("Failed to send buffer\n");
+//        flag = false;
+//    }
 }
 
 /**
@@ -62,11 +62,12 @@ int main(int argc, char *argv[]) {
         return -1;
     }
     // tcp客户端
-    tcpClient = new TCPClient(argv[1], 6656);
-    if (!tcpClient->connect()) {
-        return -1;
-    }
+//    tcpClient = new TCPClient(argv[1], 6656);
+//    if (!tcpClient->connect()) {
+//        return -1;
+//    }
     ExternFunction functionRecord;
+    MDisplayInfo d = functionRecord.getDisplayInfo();
     // 录屏文件保存路径
     fp = fopen("/sdcard/test.h264", "w");
     // 初始化录屏，帧率设置无用待解决
@@ -75,7 +76,7 @@ int main(int argc, char *argv[]) {
     functionRecord.runRecord(&flag, callback);
     functionRecord.stopRecord();
     fclose(fp);
-    tcpClient->close();
-    delete tcpClient;
+//    tcpClient->close();
+//    delete tcpClient;
     return 0;
 }

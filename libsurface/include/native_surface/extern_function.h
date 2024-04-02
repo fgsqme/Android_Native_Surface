@@ -7,10 +7,13 @@
 // System libs
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 #include <android/api-level.h>
 // User libs
 #include "utils.h"
 #include <android/native_window.h>
+
+using namespace std;
 
 struct MDisplayInfo {
     uint32_t width{0};
@@ -81,6 +84,15 @@ public:
      * @return
      */
     ANativeWindow *getRecordNativeWindow();
+
+    /**
+      * 截屏
+      * @param type  输出图像类型 0:png, 1:jpg
+      * @param quality 输出质量 0 - 100
+      * @param buff buff
+      * @return 是否成功
+      */
+    int captureScreen(uint8_t type, uint8_t quality, vector<uint8_t> *buff);
 
 
 };

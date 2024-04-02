@@ -1,0 +1,1 @@
+g++ .\tohex.cpp

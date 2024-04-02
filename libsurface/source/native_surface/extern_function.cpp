@@ -10,7 +10,7 @@
 #include "aosp/native_surface_12_1.h"
 #include "aosp/native_surface_13.h"
 #include "aosp/native_surface_14.h"
-//#include "aosp/dev.h"
+#include "aosp/dev.h"
 
 // 方法指针
 struct FuncPointer {
@@ -23,6 +23,7 @@ struct FuncPointer {
     void *func_stopRecord;
     void *func_initRecord;
     void *func_getRecordNativeWindow;
+    void *func_captureScreen;
 };
 
 // 动态库方案
@@ -61,7 +62,6 @@ ExternFunction::ExternFunction() {
 #else
             handle = dlblob(&native_surface_12_32, sizeof(native_surface_12_32)); // 32位支持 <<-- 其实很没必要 未测试
 #endif
-//            funcPointer.func_more_createNativeWindow = dlsym(handle, "_Z18createNativeWindowPKcjjjjb");
         } else if (get_android_api_level() == 30) { // 安卓11支持
 #ifdef __aarch64__
             handle = dlblob(&native_surface_11_64, sizeof(native_surface_11_64)); // 64位支持
@@ -94,6 +94,7 @@ ExternFunction::ExternFunction() {
         funcPointer.func_runRecord = dlsym(handle, "_Z9runRecordPbPFvPhmE");
         funcPointer.func_stopRecord = dlsym(handle, "_Z10stopRecordv");
         funcPointer.func_getRecordNativeWindow = dlsym(handle, "_Z21getRecordNativeWindowv");
+        funcPointer.func_captureScreen = dlsym(handle, "_Z13captureScreenhhPNSt3__16vectorIhNS_9allocatorIhEEEE");
     }
 
 }
@@ -185,4 +186,15 @@ void ExternFunction::runRecord(bool *flag, void (*callback)(uint8_t *, size_t)) 
  */
 void ExternFunction::stopRecord() {
     ((void (*)()) (funcPointer.func_stopRecord))();
+}
+
+/**
+ * 截屏
+ * @param type  输出图像类型 0:png, 1:jpg
+ * @param quality 输出质量 0 - 100
+ * @param buff buff
+ * @return 是否成功
+ */
+int ExternFunction::captureScreen(uint8_t type, uint8_t quality, vector<uint8_t> *buff) {
+    return ((int (*)(uint8_t, uint8_t, vector<uint8_t> *)) (funcPointer.func_captureScreen))(type, quality, buff);
 }

@@ -12,9 +12,14 @@
 //#include "touch.h"
 // 触摸穿透解决方案
 #include "touch.h"
+
+extern Draw *draw;
+
 // 接收h264编码流，使用ffmpeg解码到imgui显示
 int main(int argc, char *argv[]) {
-    if (!initDraw(true)) {
+    draw = new DrawVulkan(); // DrawVulkan /  DrawOpenGL
+
+    if (!draw->initDraw(true)) {
         return -1;
     }
     initTouch();
@@ -27,13 +32,13 @@ int main(int argc, char *argv[]) {
     int bufferLen = 1024 * 1024 * 4;
     auto *buffer = new mbyte[bufferLen];
 
-    while (true){
+    while (true) {
         // 监听客户端
         TCPClient *tcpClient = tcpServer.accept();
         DataDec dataDec(buffer, bufferLen);
         ssize_t err = 0;
         while (true) {
-            drawBegin();
+            draw->drawBegin();
             // 接收头信息
             err = tcpClient->recvo(buffer, DataDec::headerSize());
             if (err != DataDec::headerSize()) {
@@ -55,7 +60,7 @@ int main(int argc, char *argv[]) {
             ImGui::SetWindowSize(ImVec2(imVec2.x + 100, imVec2.y + 100));
             ImGui::Image((ImTextureID) imageTexture.getOpenglTexture(), imVec2);
             ImGui::End();
-            drawEnd();
+            draw->drawEnd();
         }
         tcpClient->close();
     }
@@ -63,6 +68,6 @@ int main(int argc, char *argv[]) {
     tcpServer.close();
     delete[] buffer;
     closeTouch();
-    shutdown();
+    draw->shutdown();
     return 0;
 }

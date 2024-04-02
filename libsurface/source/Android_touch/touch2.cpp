@@ -264,7 +264,8 @@ int create_uinput_device(int screenW, int screenH) {
 vector<input_event> input_event_filter(vector<input_event> events) {
     vector<input_event> event;
     for (int i = 0; i < events.size(); i++) {
-        if (events[i].type == EV_ABS || events[i].type == EV_SYN) {
+        if (events[i].type == EV_KEY || events[i].type == EV_ABS || events[i].type == EV_SYN) {
+//            printf("type: %X,code: %X,value:%X\n",events[i].type ,events[i].code,events[i].value);
             event.push_back(events[i]);
         }
     }
@@ -272,7 +273,6 @@ vector<input_event> input_event_filter(vector<input_event> events) {
 }
 
 MDisplayInfo getTouchDisplyInfo1() {
-
     if (draw->displayInfo.orientation == 0 || draw->displayInfo.orientation == 2) {
         return {draw->displayInfo.width, draw->displayInfo.height, draw->displayInfo.orientation};;
     } else {
@@ -334,6 +334,7 @@ vector<Rectangle> getAllWindowPositionsAndSizes() {
     return arr;
 }
 
+bool canTouch = true;
 
 void on_queue_event() {
     if (!input_queue.empty()) {
@@ -351,7 +352,6 @@ void on_queue_event() {
                             status = IM_DOWN;
                         } else if (e.value == UP) {
                             status = IM_UP;
-                            break;
                         }
                     }
                     break;
@@ -376,7 +376,6 @@ void on_queue_event() {
                 }
             }
         }
-        bool canTouch = true;
 
         // 判断imgui是否可用
         if (ImGui::GetCurrentContext()) {
@@ -397,6 +396,7 @@ void on_queue_event() {
                 imGuInputEvent.type = IM_MOVE;
             } else {                           // 放开
                 imGuInputEvent.type = IM_UP;
+                canTouch = true;
             }
             ImGui_ImplAndroid_HandleInputEvent(imGuInputEvent);
         }

@@ -9,7 +9,6 @@
 #include <chrono>
 
 // User libs
-//#include <touch.h>
 #include "extern_function.h"
 
 class Draw {
@@ -30,7 +29,7 @@ public:
     // 初始化
     virtual bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) = 0;
 
-    virtual bool initDraw(int flags = 0,bool log = false) = 0;
+    virtual bool initDraw(bool log = false, int flags = 0) = 0;
 
     // 跳过 / 不跳过 录屏
     virtual void setDisableRecordState(bool b) = 0;
@@ -49,7 +48,7 @@ public:
 class DrawOpenGL : public Draw {
     bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) override;
 
-    bool initDraw(int flags = 0,bool log = false) override;
+    bool initDraw(bool log = false, int flags = 0) override;
 
     void screen_config() override;
 
@@ -65,7 +64,7 @@ class DrawOpenGL : public Draw {
 class DrawVulkan : public Draw {
     bool initDraw(uint32_t _screen_x, uint32_t _screen_y, int flags = 0, bool log = false) override;
 
-    bool initDraw(int flags = 0,bool log = false) override;
+    bool initDraw(bool log = false, int flags = 0) override;
 
     void screen_config() override;
 

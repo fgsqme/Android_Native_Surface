@@ -5,7 +5,11 @@
 #include "touch.h"
 #include "imgui.h"
 
+#include <iostream>
+#include <fstream>
+
 extern Draw *draw;
+
 
 /**
  * imgui测试
@@ -14,10 +18,11 @@ int main(int argc, char *argv[]) {
     // 在此初始化OpenGL 或者 Vulkan
     draw = new DrawVulkan(); // DrawVulkan /  DrawOpenGL
     // 初始化imgui
-    if (!draw->initDraw(false)) {
+    if (!draw->initDraw(true)) {
         return -1;
     }
-    initTouch();
+
+    initTouch(4);
     printf("Pid is %d\n", getpid());
     bool flag = true;
     while (flag) {

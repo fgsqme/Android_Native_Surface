@@ -5,8 +5,7 @@
 // Created by 泓清 on 2022/8/26.
 //
 
-#include "draw.h"
-#include <font/Font.h>
+//#include <font/Font.h>
 
 // User libs
 
@@ -29,7 +28,7 @@ EGLSurface surface = EGL_NO_SURFACE;
 EGLContext context = EGL_NO_CONTEXT;
 
 
-bool DrawOpenGL::initDraw(int flags, bool log) {
+bool DrawOpenGL::initDraw(bool log, int flags) {
     screen_config();
     orientation = displayInfo.orientation;
     return initDraw(displayInfo.width, displayInfo.height, flags, log);
@@ -154,7 +153,7 @@ void DrawOpenGL::setDisableRecordState(bool b) {
     if (disableRecord != b) {
         if (b) {
             shutdown();
-            initDraw(0x40);
+            initDraw(false, 0x40);
         } else {
             shutdown();
             initDraw();

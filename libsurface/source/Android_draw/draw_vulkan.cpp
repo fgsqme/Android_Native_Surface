@@ -11,10 +11,9 @@
 #include "imgui_impl_android.h"
 #include <cstdio>
 #include <android/native_window.h>
-#include <vector>
 
 
-bool DrawVulkan::initDraw(int flags, bool log) {
+bool DrawVulkan::initDraw(bool log, int flags) {
     screen_config();
     orientation = displayInfo.orientation;
     return initDraw(displayInfo.width, displayInfo.height, flags, log);
@@ -100,7 +99,7 @@ void DrawVulkan::setDisableRecordState(bool b) {
     if (disableRecord != b) {
         if (b) {
             shutdown();
-            initDraw(0x40);
+            initDraw(false, 0x40);
         } else {
             shutdown();
             initDraw();
